@@ -3,6 +3,6 @@
   "/_app": "pages/_app.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/new-meetup": "pages/new-meetup.js",
-  "/[meetupid]": "pages/[meetupid].js"
+  "/[meetupid]": "pages/[meetupid].js",
+  "/new-meetup": "pages/new-meetup.js"
 }

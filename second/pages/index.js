@@ -1,5 +1,5 @@
+// import { useState, useEffect } from "react";
 import MeetupList from "../components/meetups/MeetupList";
-// import Layout from "../components/layout/Layout";
 
 const DUMMY_MEETUPS = [
   {
@@ -20,12 +20,23 @@ const DUMMY_MEETUPS = [
   },
 ];
 
-function HomePage() {
-  return (
-    // <Layout>
-    <MeetupList meetups={DUMMY_MEETUPS} />
-    // </Layout>
-  );
+function HomePage(props) {
+  // const [loadedMeetups, setLoadedMeetups] = useState([]);
+
+  // ! Not useful: Unloaded useEffect Content: Next.js initially prerenders without useEffect's data, potentially leading to empty HTML tags.
+  // useEffect(() => {
+  //   setLoadedMeetups(DUMMY_MEETUPS);
+  // }, []);
+  return <MeetupList meetups={props.meetups} />;
+}
+
+export async function getStaticProps() {
+  // fetch data from an API
+  return {
+    props: {
+      meetups: DUMMY_MEETUPS,
+    },
+  };
 }
 
 export default HomePage;
