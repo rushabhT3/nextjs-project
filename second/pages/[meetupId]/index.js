@@ -1,54 +1,66 @@
+import { MongoClient, ObjectId } from "mongodb";
+
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
-function MeetupDetails() {
+function MeetupDetails(props) {
   return (
     <MeetupDetail
-      image="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg"
-      title="First Meetup"
-      address="Some Street 5, Some City"
-      description="This is a first meetup"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 }
 
 // if page is dynamic and using getStaticProps /- then use this
 export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    // this won't run on client side so writing credentials here is fine meetups: db name here
+    "mongodb+srv://nextjs-mongodb:qwertY1@cluster0.rvwo948.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  // meetups: collection name here can have same name as the db
+  const meetupsCollection = db.collection("meetups");
+
+  // Fetches all documents in the 'meetupsCollection' but only retrieves the '_id' field for each document.
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
   return {
     fallback: false,
-    paths: [
-      {
-        params: {
-          meetupId: "m1",
-        },
-      },
-      {
-        params: {
-          meetupId: "m2",
-        },
-      },
-      {
-        params: {
-          meetupId: "m3",
-        },
-      },
-    ],
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
 
 export async function getStaticProps(context) {
   // fetch data for a single meetup
   const meetupId = context.params.meetupId;
-  console.log(meetupId);
+  const client = await MongoClient.connect(
+    // this won't run on client side so writing credentials here is fine meetups: db name here
+    "mongodb+srv://nextjs-mongodb:qwertY1@cluster0.rvwo948.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  // meetups: collection name here can have same name as the db
+  const meetupsCollection = db.collection("meetups");
+
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: new ObjectId(meetupId),
+  });
+
+  client.close();
 
   return {
     props: {
       meetupData: {
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-        id: meetupId,
-        title: "First Meetup",
-        address: "Some Street 5, Some City",
-        description: "This is a first meetup",
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
       },
     },
   };
